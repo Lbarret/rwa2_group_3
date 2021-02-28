@@ -64,46 +64,34 @@ sensors:
   logical_camera_10: # over conveyor belt
     type: logical_camera
     pose:
-      xyz: [-0.004795,-4, 1.82]
+      xyz: [-0.004795, 0, 1.82]
       rpy: [0, 'pi/2', '0']
 
   logical_camera_11: # over conveyor belt
     type: logical_camera
     pose:
-      xyz: [-0.004795, -2, 1.82]
+      xyz: [-0.004795, 3, 1.82]
       rpy: [0, 'pi/2', '0']
 
-  logical_camera_12: # over conveyor belt
-    type: logical_camera
-    pose:
-      xyz: [-0.004795, 2, 1.82]
-      rpy: [0, 'pi/2', '0']
-
-  logical_camera_13: # over conveyor belt
-    type: logical_camera
-    pose:
-      xyz: [-0.004795, 4, 1.82]
-      rpy: [0, 'pi/2', '0']
-
-  logical_camera_14: # over agv 1
+  logical_camera_12: # over agv 1
     type: logical_camera
     pose:
       xyz: [0, 7, 1.5]
       rpy: [0, 'pi/2', 'pi/2']
 
-  logical_camera_15: # over agv 2
+  logical_camera_13: # over agv 2
     type: logical_camera
     pose:
       xyz: [0, -7, 1.5]
       rpy: [0, 'pi/2', 'pi/2']
 
-  breakbeam_0:
+  breakbeam_0: # at beginning of conveyor
     type: break_beam
     pose:
       xyz: [-0.004795, 4.492549, 0.879306]
       rpy: [0, 0, -1.557900]
 
-  breakbeam_1:
+  breakbeam_1: # at end of conveyor
     type: break_beam
     pose:
       xyz: [-0.004795, -4.492549, 0.879306]
