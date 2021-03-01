@@ -28,6 +28,7 @@
 #include <tf2_ros/transform_listener.h>
 #include <geometry_msgs/TransformStamped.h>
 #include <tf2_geometry_msgs/tf2_geometry_msgs.h> //--needed for tf2::Matrix3x3
+#include <boost/bind.hpp>
 
 /**
  * @brief Start the competition
@@ -123,10 +124,12 @@ public:
    * 
    * @param msg Message containing information on objects detected by the camera.
    */
+  //void logical_camera_callback(const nist_gear::LogicalCameraImage::ConstPtr &msg, int cam_idx){
   void logical_camera_callback(
-      const nist_gear::LogicalCameraImage::ConstPtr &msg)
+      const nist_gear::LogicalCameraImage::ConstPtr &msg, int cam_idx)
   {
-    ROS_INFO_STREAM_THROTTLE(10, "Logical camera: '" << msg->models.size());
+    ROS_INFO_STREAM("Models for camera " << cam_idx << ": " << msg->models.size());
+    //logical_camera_images_[cam_idx] = *msg;
   }
 
   /**
@@ -159,11 +162,18 @@ public:
       ROS_INFO_THROTTLE(1, "Laser profiler sees something.");
     }
   }
-
+/*
+  void part_report(){
+  	for(int i = 0; i < logical_camera_images_.size(); i++){
+  		ROS_INFO_STREAM_THROTTLE(10,"models for camera " << i << " :" << logical_camera_images_.at(i).models.size());
+  	}
+  }
+*/
 private:
   std::string competition_state_;
   double current_score_;
   std::vector<nist_gear::Order> received_orders_;
+  std::vector<nist_gear::LogicalCameraImage> logical_camera_images_;
 };
 
 int main(int argc, char **argv)
@@ -204,18 +214,86 @@ int main(int argc, char **argv)
       &MyCompetitionClass::break_beam_callback,
       &comp_class);
 
-  // Subscribe to the '/ariac/logical_camera_12' Topic.
-  ros::Subscriber logical_camera_subscriber = node.subscribe(
-      "/ariac/logical_camera_12", 10,
-      &MyCompetitionClass::logical_camera_callback, &comp_class);
+  // Subscribe to the '/ariac/logical_camera_0' Topic.
+  ros::Subscriber logical_camera_0_subscriber = node.subscribe<nist_gear::LogicalCameraImage>(
+      "/ariac/logical_camera_0", 1000,
+      boost::bind(&MyCompetitionClass::logical_camera_callback, &comp_class, _1, 0));
+
+  // Subscribe to the '/ariac/logical_camera_1' Topic.
+  ros::Subscriber logical_camera_1_subscriber = node.subscribe<nist_gear::LogicalCameraImage>(
+      "/ariac/logical_camera_1", 1000,
+      boost::bind(&MyCompetitionClass::logical_camera_callback, &comp_class, _1, 1));
+
+    // Subscribe to the '/ariac/logical_camera_2' Topic.
+  ros::Subscriber logical_camera_2_subscriber = node.subscribe<nist_gear::LogicalCameraImage>(
+      "/ariac/logical_camera_2", 1000,
+      boost::bind(&MyCompetitionClass::logical_camera_callback, &comp_class, _1, 2));
+
+    // Subscribe to the '/ariac/logical_camera_3' Topic.
+  ros::Subscriber logical_camera_3_subscriber = node.subscribe<nist_gear::LogicalCameraImage>(
+      "/ariac/logical_camera_3", 1000,
+      boost::bind(&MyCompetitionClass::logical_camera_callback, &comp_class, _1, 3));
+
+    // Subscribe to the '/ariac/logical_camera_4' Topic.
+  ros::Subscriber logical_camera_4_subscriber = node.subscribe<nist_gear::LogicalCameraImage>(
+      "/ariac/logical_camera_4", 1000,
+      boost::bind(&MyCompetitionClass::logical_camera_callback, &comp_class, _1, 4));
+
+    // Subscribe to the '/ariac/logical_camera_5' Topic.
+  ros::Subscriber logical_camera_5_subscriber = node.subscribe<nist_gear::LogicalCameraImage>(
+      "/ariac/logical_camera_5", 1000,
+      boost::bind(&MyCompetitionClass::logical_camera_callback, &comp_class, _1, 5));
+
+    // Subscribe to the '/ariac/logical_camera_6' Topic.
+  ros::Subscriber logical_camera_6_subscriber = node.subscribe<nist_gear::LogicalCameraImage>(
+      "/ariac/logical_camera_6", 1000,
+      boost::bind(&MyCompetitionClass::logical_camera_callback, &comp_class, _1, 6));
+
+    // Subscribe to the '/ariac/logical_camera_7' Topic.
+  ros::Subscriber logical_camera_7_subscriber = node.subscribe<nist_gear::LogicalCameraImage>(
+      "/ariac/logical_camera_7", 1000,
+      boost::bind(&MyCompetitionClass::logical_camera_callback, &comp_class, _1, 7));
+
+    // Subscribe to the '/ariac/logical_camera_8' Topic.
+  ros::Subscriber logical_camera_8_subscriber = node.subscribe<nist_gear::LogicalCameraImage>(
+      "/ariac/logical_camera_8", 1000,
+      boost::bind(&MyCompetitionClass::logical_camera_callback, &comp_class, _1, 8));
+
+    // Subscribe to the '/ariac/logical_camera_9' Topic.
+  ros::Subscriber logical_camera_9_subscriber = node.subscribe<nist_gear::LogicalCameraImage>(
+      "/ariac/logical_camera_9", 1000,
+      boost::bind(&MyCompetitionClass::logical_camera_callback, &comp_class, _1, 9));
+
+    // Subscribe to the '/ariac/logical_camera_10' Topic.
+  ros::Subscriber logical_camera_10_subscriber = node.subscribe<nist_gear::LogicalCameraImage>(
+      "/ariac/logical_camera_10", 100,
+      boost::bind(&MyCompetitionClass::logical_camera_callback, &comp_class, _1, 10));
+
+    // Subscribe to the '/ariac/logical_camera_11' Topic.
+  ros::Subscriber logical_camera_11_subscriber = node.subscribe<nist_gear::LogicalCameraImage>(
+      "/ariac/logical_camera_11", 1000,
+      boost::bind(&MyCompetitionClass::logical_camera_callback, &comp_class, _1, 11));
+
+    // Subscribe to the '/ariac/logical_camera_12' Topic.
+  ros::Subscriber logical_camera_12_subscriber = node.subscribe<nist_gear::LogicalCameraImage>(
+      "/ariac/logical_camera_12", 1000,
+      boost::bind(&MyCompetitionClass::logical_camera_callback, &comp_class, _1, 12));
+
+      // Subscribe to the '/ariac/logical_camera_13' Topic.
+  ros::Subscriber logical_camera_13_subscriber = node.subscribe<nist_gear::LogicalCameraImage>(
+      "/ariac/logical_camera_13", 1000,
+      boost::bind(&MyCompetitionClass::logical_camera_callback, &comp_class, _1, 13));
 
   // Subscribe to the '/ariac/laser_profiler_0' Topic.
   ros::Subscriber laser_profiler_subscriber = node.subscribe(
       "/ariac/laser_profiler_0", 10, &MyCompetitionClass::laser_profiler_callback, &comp_class);
 
+  //comp_class.part_report();
+
   ROS_INFO("Setup complete.");
   start_competition(node);
-  ros::spin(); // This executes callbacks on new data until ctrl-c.
 
+  ros::spin();
+  
   return 0;
 }
