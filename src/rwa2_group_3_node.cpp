@@ -28,6 +28,7 @@
 #include <tf2_ros/transform_listener.h>
 #include <geometry_msgs/TransformStamped.h>
 #include <tf2_geometry_msgs/tf2_geometry_msgs.h> //--needed for tf2::Matrix3x3
+#include <boost/bind.hpp>
 
 /**
  * @brief Start the competition
@@ -123,10 +124,75 @@ public:
    * 
    * @param msg Message containing information on objects detected by the camera.
    */
+  //void logical_camera_callback(const nist_gear::LogicalCameraImage::ConstPtr &msg, int cam_idx){
   void logical_camera_callback(
-      const nist_gear::LogicalCameraImage::ConstPtr &msg)
+      const nist_gear::LogicalCameraImage::ConstPtr &msg, int id)
   {
-    ROS_INFO_STREAM_THROTTLE(10, "Logical camera: '" << msg->models.size());
+    ROS_INFO_STREAM_THROTTLE(10, "Logical camera: " << msg->models.size() << " objects");
+
+    if(msg->models.size() > 0) {
+      tf2_ros::Buffer tfBuffer;
+      tf2_ros::TransformListener tfListener(tfBuffer);
+
+      ros::Rate rate(10);
+      ros::Duration timeout(5.0);
+      
+      geometry_msgs::TransformStamped transformStamped;
+      geometry_msgs::PoseStamped pose_in_world, pose_in_reference;
+
+      try {
+        	transformStamped = tfBuffer.lookupTransform("world", "logical_camera_" + std::to_string(id) + "_frame",
+                                ros::Time(0), timeout);
+      }
+      catch (tf2::TransformException &ex) {
+        ROS_WARN("%s",ex.what());
+        ros::Duration(1.0).sleep();
+      }
+
+      for(int i=0; i<=msg->models.size(); i++) {
+        pose_in_reference.pose = msg->models[i].pose;
+        tf2::doTransform(pose_in_reference, pose_in_world, transformStamped);
+
+        tf2::Quaternion q(
+          pose_in_world.pose.orientation.x,
+          pose_in_world.pose.orientation.y,
+          pose_in_world.pose.orientation.z,
+          pose_in_world.pose.orientation.w
+        );
+
+        tf2::Matrix3x3 m(q);
+        double roll, pitch, yaw;
+        m.getRPY(roll, pitch, yaw);
+
+        ROS_INFO("%s, world frame co-ordinates: [%f,%f,%f] [%f,%f,%f]",
+                    msg->models[i].type.c_str(),
+                    pose_in_world.pose.position.x,
+                    pose_in_world.pose.position.y,
+                    pose_in_world.pose.position.z,
+                    roll,
+                    pitch,
+                    yaw);
+        
+        // tf2::Quaternion q(
+        //   transformStamped.transform.rotation.x,
+        //   transformStamped.transform.rotation.y,
+        //   transformStamped.transform.rotation.z,
+        //   transformStamped.transform.rotation.w);
+        // tf2::Matrix3x3 m(q);
+        // double roll, pitch, yaw;
+        // m.getRPY(roll, pitch, yaw);
+
+        // ROS_INFO("%s in world frame: [%f,%f,%f] [%f,%f,%f]", msg->models[i].type,
+        // transformStamped.transform.translation.x,
+        // transformStamped.transform.translation.y,
+        // transformStamped.transform.translation.z,
+        // roll,
+        // pitch,
+        // yaw);
+        
+      }
+      
+    }
   }
 
   /**
@@ -159,11 +225,18 @@ public:
       ROS_INFO_THROTTLE(1, "Laser profiler sees something.");
     }
   }
-
+/*
+  void part_report(){
+  	for(int i = 0; i < logical_camera_images_.size(); i++){
+  		ROS_INFO_STREAM_THROTTLE(10,"models for camera " << i << " :" << logical_camera_images_.at(i).models.size());
+  	}
+  }
+*/
 private:
   std::string competition_state_;
   double current_score_;
   std::vector<nist_gear::Order> received_orders_;
+  std::vector<nist_gear::LogicalCameraImage> logical_camera_images_;
 };
 
 int main(int argc, char **argv)
@@ -204,18 +277,86 @@ int main(int argc, char **argv)
       &MyCompetitionClass::break_beam_callback,
       &comp_class);
 
-  // Subscribe to the '/ariac/logical_camera_12' Topic.
-  ros::Subscriber logical_camera_subscriber = node.subscribe(
-      "/ariac/logical_camera_12", 10,
-      &MyCompetitionClass::logical_camera_callback, &comp_class);
+  // Subscribe to the '/ariac/logical_camera_0' Topic.
+  ros::Subscriber logical_camera_0_subscriber = node.subscribe<nist_gear::LogicalCameraImage>(
+      "/ariac/logical_camera_0", 1000,
+      boost::bind(&MyCompetitionClass::logical_camera_callback, &comp_class, _1, 0));
+
+  // Subscribe to the '/ariac/logical_camera_1' Topic.
+  ros::Subscriber logical_camera_1_subscriber = node.subscribe<nist_gear::LogicalCameraImage>(
+      "/ariac/logical_camera_1", 1000,
+      boost::bind(&MyCompetitionClass::logical_camera_callback, &comp_class, _1, 1));
+
+    // Subscribe to the '/ariac/logical_camera_2' Topic.
+  ros::Subscriber logical_camera_2_subscriber = node.subscribe<nist_gear::LogicalCameraImage>(
+      "/ariac/logical_camera_2", 1000,
+      boost::bind(&MyCompetitionClass::logical_camera_callback, &comp_class, _1, 2));
+
+    // Subscribe to the '/ariac/logical_camera_3' Topic.
+  ros::Subscriber logical_camera_3_subscriber = node.subscribe<nist_gear::LogicalCameraImage>(
+      "/ariac/logical_camera_3", 1000,
+      boost::bind(&MyCompetitionClass::logical_camera_callback, &comp_class, _1, 3));
+
+    // Subscribe to the '/ariac/logical_camera_4' Topic.
+  ros::Subscriber logical_camera_4_subscriber = node.subscribe<nist_gear::LogicalCameraImage>(
+      "/ariac/logical_camera_4", 1000,
+      boost::bind(&MyCompetitionClass::logical_camera_callback, &comp_class, _1, 4));
+
+    // Subscribe to the '/ariac/logical_camera_5' Topic.
+  ros::Subscriber logical_camera_5_subscriber = node.subscribe<nist_gear::LogicalCameraImage>(
+      "/ariac/logical_camera_5", 1000,
+      boost::bind(&MyCompetitionClass::logical_camera_callback, &comp_class, _1, 5));
+
+    // Subscribe to the '/ariac/logical_camera_6' Topic.
+  ros::Subscriber logical_camera_6_subscriber = node.subscribe<nist_gear::LogicalCameraImage>(
+      "/ariac/logical_camera_6", 1000,
+      boost::bind(&MyCompetitionClass::logical_camera_callback, &comp_class, _1, 6));
+
+    // Subscribe to the '/ariac/logical_camera_7' Topic.
+  ros::Subscriber logical_camera_7_subscriber = node.subscribe<nist_gear::LogicalCameraImage>(
+      "/ariac/logical_camera_7", 1000,
+      boost::bind(&MyCompetitionClass::logical_camera_callback, &comp_class, _1, 7));
+
+    // Subscribe to the '/ariac/logical_camera_8' Topic.
+  ros::Subscriber logical_camera_8_subscriber = node.subscribe<nist_gear::LogicalCameraImage>(
+      "/ariac/logical_camera_8", 1000,
+      boost::bind(&MyCompetitionClass::logical_camera_callback, &comp_class, _1, 8));
+
+    // Subscribe to the '/ariac/logical_camera_9' Topic.
+  ros::Subscriber logical_camera_9_subscriber = node.subscribe<nist_gear::LogicalCameraImage>(
+      "/ariac/logical_camera_9", 1000,
+      boost::bind(&MyCompetitionClass::logical_camera_callback, &comp_class, _1, 9));
+
+    // Subscribe to the '/ariac/logical_camera_10' Topic.
+  ros::Subscriber logical_camera_10_subscriber = node.subscribe<nist_gear::LogicalCameraImage>(
+      "/ariac/logical_camera_10", 100,
+      boost::bind(&MyCompetitionClass::logical_camera_callback, &comp_class, _1, 10));
+
+    // Subscribe to the '/ariac/logical_camera_11' Topic.
+  ros::Subscriber logical_camera_11_subscriber = node.subscribe<nist_gear::LogicalCameraImage>(
+      "/ariac/logical_camera_11", 1000,
+      boost::bind(&MyCompetitionClass::logical_camera_callback, &comp_class, _1, 11));
+
+    // Subscribe to the '/ariac/logical_camera_12' Topic.
+  ros::Subscriber logical_camera_12_subscriber = node.subscribe<nist_gear::LogicalCameraImage>(
+      "/ariac/logical_camera_12", 1000,
+      boost::bind(&MyCompetitionClass::logical_camera_callback, &comp_class, _1, 12));
+
+      // Subscribe to the '/ariac/logical_camera_13' Topic.
+  ros::Subscriber logical_camera_13_subscriber = node.subscribe<nist_gear::LogicalCameraImage>(
+      "/ariac/logical_camera_13", 1000,
+      boost::bind(&MyCompetitionClass::logical_camera_callback, &comp_class, _1, 13));
 
   // Subscribe to the '/ariac/laser_profiler_0' Topic.
   ros::Subscriber laser_profiler_subscriber = node.subscribe(
       "/ariac/laser_profiler_0", 10, &MyCompetitionClass::laser_profiler_callback, &comp_class);
 
+  //comp_class.part_report();
+
   ROS_INFO("Setup complete.");
   start_competition(node);
-  ros::spin(); // This executes callbacks on new data until ctrl-c.
 
+  ros::spin();
+  
   return 0;
 }
