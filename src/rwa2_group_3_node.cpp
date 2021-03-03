@@ -141,7 +141,7 @@ public:
 
       for(int i=0; i<=msg->models.size(); i++) {
         try{
-        transformStamped = tfBuffer.lookupTransform("world", "logical_camera_"+ std::to_string(id) + msg->models[i].type,
+        	    		transformStamped = tfBuffer.lookupTransform("world", "logical_camera_"+ std::to_string(id) +"_" + msg->models[i].type +"_" +std::to_string(i)+"_frame",
                                 ros::Time(0), timeout);
         }
         catch (tf2::TransformException &ex) {
