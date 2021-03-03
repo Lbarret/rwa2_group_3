@@ -149,7 +149,7 @@ public:
         ros::Duration(1.0).sleep();
       }
 
-      for(int i=0; i<=msg->models.size(); i++) {
+      for(int i=0; i<msg->models.size(); i++) {
         pose_in_reference.pose = msg->models[i].pose;
         tf2::doTransform(pose_in_reference, pose_in_world, transformStamped);
 
