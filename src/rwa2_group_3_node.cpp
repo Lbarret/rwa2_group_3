@@ -128,7 +128,7 @@ public:
   void logical_camera_callback(
       const nist_gear::LogicalCameraImage::ConstPtr &msg, int id)
   {
-    ROS_INFO_STREAM_THROTTLE(10, "Logical camera: '" << msg->models.size());
+    ROS_INFO_STREAM_THROTTLE(10, "Logical camera: " << msg->models.size() << " objects");
 
     if(msg->models.size() > 0) {
       tf2_ros::Buffer tfBuffer;
@@ -138,33 +138,58 @@ public:
       ros::Duration timeout(5.0);
       
       geometry_msgs::TransformStamped transformStamped;
+      geometry_msgs::PoseStamped pose_in_world, pose_in_reference;
+
+      try {
+        	transformStamped = tfBuffer.lookupTransform("world", "logical_camera_" + std::to_string(id) + "_frame",
+                                ros::Time(0), timeout);
+      }
+      catch (tf2::TransformException &ex) {
+        ROS_WARN("%s",ex.what());
+        ros::Duration(1.0).sleep();
+      }
 
       for(int i=0; i<=msg->models.size(); i++) {
-        try{
-        	    		transformStamped = tfBuffer.lookupTransform("world", "logical_camera_"+ std::to_string(id) +"_" + msg->models[i].type +"_" +std::to_string(i)+"_frame",
-                                ros::Time(0), timeout);
-        }
-        catch (tf2::TransformException &ex) {
-          ROS_WARN("%s",ex.what());
-          ros::Duration(1.0).sleep();
-        }
-        
+        pose_in_reference.pose = msg->models[i].pose;
+        tf2::doTransform(pose_in_reference, pose_in_world, transformStamped);
+
         tf2::Quaternion q(
-          transformStamped.transform.rotation.x,
-          transformStamped.transform.rotation.y,
-          transformStamped.transform.rotation.z,
-          transformStamped.transform.rotation.w);
+          pose_in_world.pose.orientation.x,
+          pose_in_world.pose.orientation.y,
+          pose_in_world.pose.orientation.z,
+          pose_in_world.pose.orientation.w
+        );
+
         tf2::Matrix3x3 m(q);
         double roll, pitch, yaw;
         m.getRPY(roll, pitch, yaw);
 
-        ROS_INFO("%s in world frame: [%f,%f,%f] [%f,%f,%f]", msg->models[i].type,
-        transformStamped.transform.translation.x,
-        transformStamped.transform.translation.y,
-        transformStamped.transform.translation.z,
-        roll,
-        pitch,
-        yaw);
+        ROS_INFO("%s, world frame co-ordinates: [%f,%f,%f] [%f,%f,%f]",
+                    msg->models[i].type.c_str(),
+                    pose_in_world.pose.position.x,
+                    pose_in_world.pose.position.y,
+                    pose_in_world.pose.position.z,
+                    roll,
+                    pitch,
+                    yaw);
+        
+        // tf2::Quaternion q(
+        //   transformStamped.transform.rotation.x,
+        //   transformStamped.transform.rotation.y,
+        //   transformStamped.transform.rotation.z,
+        //   transformStamped.transform.rotation.w);
+        // tf2::Matrix3x3 m(q);
+        // double roll, pitch, yaw;
+        // m.getRPY(roll, pitch, yaw);
+
+        // ROS_INFO("%s in world frame: [%f,%f,%f] [%f,%f,%f]", msg->models[i].type,
+        // transformStamped.transform.translation.x,
+        // transformStamped.transform.translation.y,
+        // transformStamped.transform.translation.z,
+        // roll,
+        // pitch,
+        // yaw);
+        
       }
       
     }
