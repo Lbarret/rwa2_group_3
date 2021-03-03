@@ -126,10 +126,48 @@ public:
    */
   //void logical_camera_callback(const nist_gear::LogicalCameraImage::ConstPtr &msg, int cam_idx){
   void logical_camera_callback(
-      const nist_gear::LogicalCameraImage::ConstPtr &msg, int cam_idx)
+      const nist_gear::LogicalCameraImage::ConstPtr &msg, int id)
   {
-    ROS_INFO_STREAM("Models for camera " << cam_idx << ": " << msg->models.size());
-    //logical_camera_images_[cam_idx] = *msg;
+    ROS_INFO_STREAM_THROTTLE(10, "Logical camera: '" << msg->models.size());
+
+    if(msg->models.size() > 0) {
+      tf2_ros::Buffer tfBuffer;
+      tf2_ros::TransformListener tfListener(tfBuffer);
+
+      ros::Rate rate(10);
+      ros::Duration timeout(5.0);
+      
+      geometry_msgs::TransformStamped transformStamped;
+
+      for(int i=0; i<=msg->models.size(); i++) {
+        try{
+        transformStamped = tfBuffer.lookupTransform("world", "logical_camera_"+ std::to_string(id) + msg->models[i].type,
+                                ros::Time(0), timeout);
+        }
+        catch (tf2::TransformException &ex) {
+          ROS_WARN("%s",ex.what());
+          ros::Duration(1.0).sleep();
+        }
+        
+        tf2::Quaternion q(
+          transformStamped.transform.rotation.x,
+          transformStamped.transform.rotation.y,
+          transformStamped.transform.rotation.z,
+          transformStamped.transform.rotation.w);
+        tf2::Matrix3x3 m(q);
+        double roll, pitch, yaw;
+        m.getRPY(roll, pitch, yaw);
+
+        ROS_INFO("%s in world frame: [%f,%f,%f] [%f,%f,%f]", msg->models[i].type,
+        transformStamped.transform.translation.x,
+        transformStamped.transform.translation.y,
+        transformStamped.transform.translation.z,
+        roll,
+        pitch,
+        yaw);
+      }
+      
+    }
   }
 
   /**
